@@ -11,46 +11,95 @@ class TodoPage extends ConsumerWidget {
 
     return Scaffold(
       appBar: AppBar(
-        title: Text('To-Do List Riverpod'),
+        title: Text('Riverpod To-Do List'),
+        centerTitle: true,
+        backgroundColor: Colors.deepPurple,
       ),
-      body: Column(
-        children: [
-          Padding(
-            padding: const EdgeInsets.all(8.0),
-            child: TextField(
+      body: Padding(
+        padding: const EdgeInsets.all(16.0),
+        child: Column(
+          children: [
+            TextField(
               controller: taskController,
               decoration: InputDecoration(
                 labelText: 'Add a new task',
-                suffixIcon: IconButton(
-                  icon: Icon(Icons.add),
-                  onPressed: () {
-                    if (taskController.text.isNotEmpty) {
-                      ref
-                          .read(todoProvider.notifier)
-                          .addTask(taskController.text);
-                      taskController.clear();
-                    }
-                  },
+                labelStyle: TextStyle(color: Colors.deepPurple),
+                filled: true,
+                fillColor: Colors.deepPurple.shade50,
+                prefixIcon: Icon(Icons.task, color: Colors.deepPurple),
+                enabledBorder: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(12),
+                  borderSide: BorderSide(color: Colors.deepPurple),
+                ),
+                focusedBorder: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(12),
+                  borderSide: BorderSide(color: Colors.deepPurple, width: 2),
                 ),
               ),
             ),
-          ),
-          Expanded(
-            child: ListView.builder(
-              itemCount: todos.length,
-              itemBuilder: (context, index) {
-                return ListTile(
-                  title: Text(todos[index].title),
-                  trailing: IconButton(
-                    icon: Icon(Icons.delete),
-                    onPressed: () =>
-                        ref.read(todoProvider.notifier).removeTask(index),
-                  ),
-                );
-              },
+            SizedBox(height: 20),
+            Expanded(
+              child: todos.isEmpty
+                  ? Center(
+                      child: Text(
+                        'No tasks yet, add some!',
+                        style: TextStyle(
+                          color: Colors.grey,
+                          fontSize: 18,
+                        ),
+                      ),
+                    )
+                  : ListView.builder(
+                      itemCount: todos.length,
+                      itemBuilder: (context, index) {
+                        return Card(
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(15),
+                          ),
+                          elevation: 4,
+                          margin: EdgeInsets.symmetric(vertical: 8),
+                          child: ListTile(
+                            leading: Checkbox(
+                              value: todos[index].isDone,
+                              onChanged: (bool? value) {
+                                ref
+                                    .read(todoProvider.notifier)
+                                    .toggleTaskStatus(index);
+                              },
+                            ),
+                            title: Text(
+                              todos[index].title,
+                              style: TextStyle(
+                                fontSize: 18,
+                                fontWeight: FontWeight.w500,
+                                decoration: todos[index].isDone
+                                    ? TextDecoration.lineThrough
+                                    : TextDecoration.none,
+                              ),
+                            ),
+                            trailing: IconButton(
+                              icon: Icon(Icons.delete, color: Colors.redAccent),
+                              onPressed: () => ref
+                                  .read(todoProvider.notifier)
+                                  .removeTask(index),
+                            ),
+                          ),
+                        );
+                      },
+                    ),
             ),
-          ),
-        ],
+          ],
+        ),
+      ),
+      floatingActionButton: FloatingActionButton(
+        backgroundColor: Colors.deepPurple,
+        onPressed: () {
+          if (taskController.text.isNotEmpty) {
+            ref.read(todoProvider.notifier).addTask(taskController.text);
+            taskController.clear();
+          }
+        },
+        child: Icon(Icons.add),
       ),
     );
   }
